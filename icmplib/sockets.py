@@ -317,19 +317,21 @@ class ICMPSocket:
         if not self._sock:
             raise SocketUnavailableError
 
-        self._sock.settimeout(timeout)
-        time_limit = time() + timeout
+        start_time = time()
+        time_limit = start_time + timeout
 
         try:
             while True:
+                remaining_time = time_limit - time()
+                if remaining_time <= 0:
+                    raise socket.timeout
+
+                self._sock.settimeout(remaining_time)
                 response = self._sock.recvfrom(1024)
                 current_time = time()
 
                 packet = response[0]
                 source = response[1][0]
-
-                if current_time > time_limit:
-                    raise socket.timeout
 
                 reply = self._parse_reply(
                     packet=packet,
