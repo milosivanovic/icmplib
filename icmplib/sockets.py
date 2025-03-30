@@ -323,10 +323,7 @@ class ICMPSocket:
         try:
             while True:
                 remaining_time = time_limit - time()
-                if remaining_time <= 0:
-                    raise socket.timeout
-
-                self._sock.settimeout(remaining_time)
+                self._sock.settimeout(max(remaining_time, 0))
                 response = self._sock.recvfrom(1024)
                 current_time = time()
 
